@@ -1,21 +1,30 @@
+''' Tyson Elfors
+6/13/20
+CS-1410
+Project 5 - Data Visualization
+'''
+
+"""I declare that the following source code was written solely by me.
+I understand that copying any source code, in whole or in part, constitues cheating,
+and that I will receive a zero on this project if I am found in violation of this policy."""
+
 import numpy as np
-import sys #numpy setting to see entire array
-np.set_printoptions(threshold=sys.maxsize) #numpy setting to see entire array
 import matplotlib.pyplot as plt
 import glob
 
 glob.glob("*.dat")
 
+allRanges = []
+
 def analyze(fname):
-    print(fname) #file name
     raw = np.loadtxt(fname, dtype='i4') #load each file text
 
     first = raw[:3] #first three of raw for inserting
     second = raw[-3:] #last three of raw for appending
 
     '''Plotting'''
-    plt.plot(raw)
-    plt.ylabel('some nums')
+    # plt.plot(raw)
+    # plt.ylabel('some nums')
 
 
     def smoothed(i):
@@ -78,29 +87,52 @@ def analyze(fname):
 
             if len(myListRange) > 50: #if it is greater than fifty only include the first 50
                 toSum = raw[start:end]
-                print("here is the range = ",np.sum(toSum)) #range
+                aRange = np.sum(toSum)
+                allRanges.append(aRange)
             else:
                 toSum = raw[start:end] #give start and end nums for calcluating range
-                print("here is the range = ",np.sum(toSum)) #range
+                aRange = np.sum(toSum)
+                allRanges.append(aRange)
 
     lastEls = firstEls[-1] 
 
     allSum = raw[lastEls:lastEls + 50]
 
-    print("here is the last range = ", np.sum(allSum)) #last range
+    fNameSplit = fname.split(".") #split file name
+    fNameFirst = fNameSplit[0] #get the first index of file name
+
+    anotherRange = np.sum(allSum)
+    allRanges.append(anotherRange)
 
 
+    fileI = 1
+    elsI = 0
+    with open(f"{fNameFirst}.out", 'a') as f: #open text file for appending
+        print(f"{fname}:\n", file=f) #print to text file
 
-    print("_________________________________________")
+    for r in allRanges:
+        with open(f"{fNameFirst}.out", 'a') as f: #open text file for appending
+            print(f"Pulse {fileI}: {firstEls[elsI] + 1} ({r}) \n", file=f) #print to text file
+        fileI += 1 #iterator
+        elsI += 1 #iterator
 
 
     '''Plotting'''
-    _,axis = plt.subplots() # Defaults to one axis
-    axis.plot(smoothedArr)
-    axis.set(title="Smoothed Array")
-    plt.show()
+    _,axes = plt.subplots(nrows=2)
+    axes[0].plot(raw)
+    axes[0].set(title=fname,ylabel="raw",xticks=[])
+
+    axes[1].plot(smoothedArr)
+    axes[1].set_ylabel("smooth")
+
+    plt.savefig(f"${fNameFirst}.pdf")# Save plot to a PDF file
+
+    allRanges.clear() #clear the list of all ranges
+
+    return f"{fname} successfully analyzed"
 
 def main():
+    '''Iterate over each file with .dat extension for data manipulation'''
     for fname in glob.glob('*.dat'):
         print(analyze(fname))
 
